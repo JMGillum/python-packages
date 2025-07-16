@@ -147,7 +147,7 @@ class Tree:
         """
         string = []
         if self.name:
-            prefix = self.end if last else self.branch
+            prefix = self.end if last else self.branch # Determine if this is the last child of its parent, and sets branch character accordingly
             try:
                 if self.line_wrap > 0: # If their is a max text width set, split into multiple lines
                     # Splits the text into a number of lines with max lengths of self.line_wrap
@@ -167,14 +167,18 @@ class Tree:
             for i in range(len(self.nodes)): # Loops through each node
                 item = self.nodes[i]
                 if isinstance(item, str):
-                    # If the node is just text, decide if this is the last child of the tree
+                    # If the node is just text, decide if this is the last child of its parent's tree
                     # Change the branch character if it is, otherwise use standard branch character.
                     prefix = self.end if (i == len(self.nodes) - 1) else self.branch
+                    # Does the same process as with the name, determining if the text needs to be
+                    # split across several lines, and doing so if needed.
                     try:
                         wrap = None
                         if self.line_wrap is not None and self.line_wrap > 0:
                             wrap = self.line_wrap
                         if self.width is not None and self.width > 0:
+                            # Determines the max width that the text can be. It is equal to the max width minus
+                            # the length of the current prefix and the length of all of the prior prefixes
                             wrap = self.width - len(prefix) - prior_prefix
                         if wrap is not None:
                             temp = tabulate(item, wrap, 0)
@@ -184,6 +188,14 @@ class Tree:
                                     if j == 0:
                                         string.append(f"{prefix}{temp[j]}")
                                     else:
+                                        # Determines which character to use for indicating that this is wrapping.
+                                        # Typically will use a pipe to extend the node if needed, but if
+                                        # it is the last node, will only use a space. Regardless, it also uses the
+                                        # typical split line character.
+                                        # Ex normal node:         Ex last node:
+                                        # -> This is a test       -> This is a test
+                                        # |~ of the line           ~ of the line
+                                        # |~ wrapping function.    ~ wrapping function.
                                         if i == len(self.nodes) - 1:
                                             wrap_prefix = self.space
                                         else:
@@ -195,20 +207,22 @@ class Tree:
                             string.append(f"{prefix}{item}")
                     except AttributeError:
                         string.append(f"{prefix}{item}")
-                elif isinstance(item, Tree):
-                    child_last = i == len(self.nodes) - 1
-                    prefix = self.end if last else self.branch
+                elif isinstance(item, Tree): # If the child node is another Tree object, generate that object.
+                    child_last = (i == len(self.nodes) - 1) # Boolean as to whether this is the last child of this node
+                    prefix = self.end if last else self.branch # Determines if this is the last child node of its parent, and sets branch character accordingly
+                    # Generate the child node, indicating whether it is the last node.
                     child = item.recursive_generation(
                         child_last, len(prefix) + prior_prefix
                     )
-                    for j in range(1, len(child)):
+                    for j in range(1, len(child)): # Loops through all lines returned from child node
                         line = child[j]
-                        if i != len(self.nodes) - 1:
+                        # Set prefix according to whether this is the last child node or not
+                        if i != len(self.nodes) - 1: 
                             child[j] = self.pipe
                         else:
                             child[j] = self.space
                         if len(line) > 0 and line[0] != self.split_line:
                             child[j] += self.space
-                        child[j] += line
-                    string += child
-        return string
+                        child[j] += line # Add the lines from the inner tree back to the prefixes.
+                    string += child # Add the lines of the child to the lines of this tree
+        return string # Return the lines of this tree level back to the parent
