@@ -1,6 +1,6 @@
 """
    Author: Josh Gillum              .
-   Date: 16 July 2025              ":"         __ __ 
+   Date: 17 July 2025              ":"         __ __ 
                                   __|___       \ V /
                                 .'      '.      | |
                                 |  O       \____/  |
@@ -37,9 +37,19 @@ class Tree:
         name: str = None,
         nodes: list | None = None,
         fancy=False,
-        wrap=None,
-        width=None,
+        wrap:int=None,
+        width:int=None,
     ):
+        """ Class modelling a general purpose tree. All values specified here can later be updated
+        with one of the set_x or cascading_update or cascading_set_x functions. 
+
+        Args:
+            name (str, optional): The name of the tree. Printed at the current level before its child nodes. Defaults to None.
+            nodes (list | None, optional): The children nodes of the tree. Defaults to None.
+            fancy (bool, optional): Whether fancy (7-bit ASCII) characters will be used. Defaults to False.
+            wrap (int, optional): The max width of a single node when printed. Defaults to None.
+            width (int, optional): The max width of the entire tree when printed. Defaults to None.
+        """
         self.set_name(name)
         self.set_nodes(nodes)
         self.set_fancy(fancy)
@@ -52,47 +62,36 @@ class Tree:
         self.set_line_wrap(wrap)
 
     def set_name(self, name: str):
+        """ Sets the name of the tree object
+
+        Args:
+            name (str): The new name of the tree
+        """
         self.name = name
         self.dirty = True
 
     def set_nodes(self, nodes: list | None):
+        """ Sets the nodes of the tree. Overwrites any previous nodes
+
+        Args:
+            nodes (list | None): A list of nodes for the tree
+        """
         self.nodes = nodes
         self.dirty = True
 
-    def cascading_update(self, set_fancy=None, line_width=None, term_width=None):
-        if set_fancy is not None:
-            self.cascading_set_fancy(set_fancy)
-        if line_width is not None:
-            self.cascading_set_line_wrap(line_width)
-        if term_width is not None:
-            self.cascading_set_term_size(term_width)
-
-    def cascading_set_fancy(self, set_fancy: bool):
-        if self.nodes is not None:
-            for item in self.nodes:
-                if isinstance(item, Tree):
-                    item.cascading_set_fancy(set_fancy)
-        self.set_fancy(set_fancy)
-
-    def cascading_set_term_size(self, width: int):
-        if self.nodes is not None:
-            for item in self.nodes:
-                if isinstance(item, Tree):
-                    item.cascading_set_term_size(width)
-        self.set_term_size(width)
-
-    def cascading_set_line_wrap(self, line_width: int):
-        if self.nodes is not None:
-            for item in self.nodes:
-                if isinstance(item, Tree):
-                    item.cascading_set_line_wrap(line_width)
-        self.set_line_wrap(line_width)
-
     def set_fancy(self, set_fancy: bool):
-        self.fancy = set_fancy
-        self.set_characters()
+        """ Sets the fancy variable for this tree (whether non 7-bit ASCII characters will be used when printing)
 
-    def set_characters(self):
+        Args:
+            set_fancy (bool): Whether to use fancy characters or not
+        """
+        self.fancy = set_fancy
+        self.__set_characters()
+
+    def __set_characters(self):
+        """ Sets the characters to be used by the tree when printing. Should not be called
+        from outside of the class. Only needed when self.fancy is changed.
+        """
         if self.fancy:
             self.pipe = "│"
             self.branch = "├─"
@@ -106,14 +105,86 @@ class Tree:
         self.split_line = "~"
 
     def set_term_size(self, width=80):
+        """ Sets the max width of the tree when printed
+
+        Args:
+            width (int, optional): The terminal size the tree will be printed on (max width of tree). Defaults to 80.
+        """
         if width is not None:
             self.width = width
 
     def set_line_wrap(self, line_width: int):
+        """ Sets the line_wrap variable
+
+        Args:
+            line_width (int): The max width of any single node in this tree
+        """
         if line_width is not None:
             self.line_wrap = line_width
 
-    def print(self, as_a_string=False):
+    def cascading_update(self, set_fancy:bool=None, line_width:int=None, term_width:int=None):
+        """ Updates the tree and all of its child Tree objects
+
+        Args:
+            set_fancy (bool, optional): Determines whether non 7-bit ASCII characters will be used when printing the tree. Defaults to None.
+            line_width (int, optional): The max width of a single node when printed. Defaults to None.
+            term_width (int, optional): The max width of the entire tree when printed. Defaults to None.
+        """
+        if set_fancy is not None:
+            self.cascading_set_fancy(set_fancy)
+        if line_width is not None:
+            self.cascading_set_line_wrap(line_width)
+        if term_width is not None:
+            self.cascading_set_term_size(term_width)
+
+    def cascading_set_fancy(self, set_fancy: bool):
+        """ Sets fancy for all of the child nodes of this tree, then for itself
+
+        Args:
+            set_fancy (bool): Sets the self.fancy variable
+        """
+        if self.nodes is not None:
+            for item in self.nodes:
+                if isinstance(item, Tree):
+                    item.cascading_set_fancy(set_fancy)
+        self.set_fancy(set_fancy)
+
+    def cascading_set_term_size(self, width: int):
+        """ Sets the term size for all child nodes of this tree, then for itself
+
+        Args:
+            width (int): Sets the self.width variable
+        """
+        if self.nodes is not None:
+            for item in self.nodes:
+                if isinstance(item, Tree):
+                    item.cascading_set_term_size(width)
+        self.set_term_size(width)
+
+    def cascading_set_line_wrap(self, line_width: int):
+        """ Sets the line_wrap variable for all child nodes of this tree, then for itself
+
+        Args:
+            line_width (int): Sets the self.line_wrap variable
+        """
+        if self.nodes is not None:
+            for item in self.nodes:
+                if isinstance(item, Tree):
+                    item.cascading_set_line_wrap(line_width)
+        self.set_line_wrap(line_width)
+
+
+    def print(self, as_a_string=False)->str|list:
+        """ Provides the tree in a printable form.
+
+        Args:
+            as_a_string (bool, optional): Will return a string instead of a list of lines if set to True. Defaults to False.
+
+        Returns:
+            (str|list): A string or a list. The list will contain the lines to be printed. There will not be
+            a newline character at the end of each string. The string will contain newline characters indicating the
+            end of each line. This is toggled with the `as_a_string` parameter.
+        """
         # if self.dirty: # Doesn't regenerate tree if no changes have been made.
         # Sets entire tree as the single child node of tree. Necessary for proper spacing
         # Saves values so they can be restored after building tree
@@ -125,7 +196,7 @@ class Tree:
         self.name = None
         self.nodes = [child]
         # Gets the tree, as a list of lines
-        self.list = self.recursive_generation(True)
+        self.list = self.__recursive_generation(True)
         # Converts the list to a single string
         self.string = ""
         for line in self.list:
@@ -136,14 +207,16 @@ class Tree:
         self.dirty = False
         return self.string if as_a_string else self.list
 
-    def recursive_generation(self, last=False, prior_prefix=0):
-        """Generates a tree, recursively
+    def __recursive_generation(self, last=False, prior_prefix=0):
+        """ Generates the lines of the tree for printing. This function is recursive and generates 
+        child trees as they are encountered. Should not be called from outside of the class. See Tree.print().
 
         Args:
-            last (bool, optional): _description_. Defaults to False.
+            last (bool, optional): Indicates whether this Tree object is the last of its parent's nodes. Defaults to False.
+            prior_prefix (int, optional): The length of the prefix before each node (Number of spaces or pipe characters from upstream branches). Defaults to 0.
 
         Returns:
-            _type_: _description_
+            list: a list of lines representing the tree.
         """
         string = []
         if self.name:
@@ -173,7 +246,7 @@ class Tree:
                     # Does the same process as with the name, determining if the text needs to be
                     # split across several lines, and doing so if needed.
                     try:
-                        wrap = None
+                        wrap = None # The max length of each line that will be printed here.
                         if self.line_wrap is not None and self.line_wrap > 0:
                             wrap = self.line_wrap
                         if self.width is not None and self.width > 0:
@@ -211,7 +284,7 @@ class Tree:
                     child_last = (i == len(self.nodes) - 1) # Boolean as to whether this is the last child of this node
                     prefix = self.end if last else self.branch # Determines if this is the last child node of its parent, and sets branch character accordingly
                     # Generate the child node, indicating whether it is the last node.
-                    child = item.recursive_generation(
+                    child = item.__recursive_generation(
                         child_last, len(prefix) + prior_prefix
                     )
                     for j in range(1, len(child)): # Loops through all lines returned from child node
