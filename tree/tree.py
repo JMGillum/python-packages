@@ -24,7 +24,7 @@
 ^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~
 """
 
-__version_info__ = ("1","0","0")
+__version_info__ = ("1","1","0")
 __version__ = ".".join(__version_info__)
 
 
@@ -174,11 +174,12 @@ class Tree:
         self.set_line_wrap(line_width)
 
 
-    def print(self, as_a_string=False)->str|list:
+    def print(self, as_a_string=False,remove_root_branch=True)->str|list:
         """ Provides the tree in a printable form.
 
         Args:
             as_a_string (bool, optional): Will return a string instead of a list of lines if set to True. Defaults to False.
+            remove_root_branch (bool, optional): Removes the preceeding root branch character if set to True. Defaults to True.
 
         Returns:
             (str|list): A string or a list. The list will contain the lines to be printed. There will not be
@@ -199,8 +200,13 @@ class Tree:
         self.list = self.__recursive_generation(True)
         # Converts the list to a single string
         self.string = ""
-        for line in self.list:
-            self.string += f"{line}\n"
+        for i in range(len(self.list)):
+            if isinstance(self.list[i],str):
+                if remove_root_branch:
+                    self.list[i] = self.list[i][len(self.end):]
+                self.string += f"{self.list[i]}\n"
+            else:
+                del(self.list[i])
         # Restores the original values of the name and nodes.
         self.name = name
         self.nodes = nodes
@@ -239,7 +245,26 @@ class Tree:
         if self.nodes is not None: # This object has some children nodes
             for i in range(len(self.nodes)): # Loops through each node
                 item = self.nodes[i]
-                if isinstance(item, str):
+                if isinstance(item, Tree): # If the child node is another Tree object, generate that object.
+                    child_last = (i == len(self.nodes) - 1) # Boolean as to whether this is the last child of this node
+                    prefix = self.end if last else self.branch # Determines if this is the last child node of its parent, and sets branch character accordingly
+                    # Generate the child node, indicating whether it is the last node.
+                    child = item.__recursive_generation(
+                        child_last, len(prefix) + prior_prefix
+                    )
+                    for j in range(1, len(child)): # Loops through all lines returned from child node
+                        line = child[j]
+                        # Set prefix according to whether this is the last child node or not
+                        if i != len(self.nodes) - 1: 
+                            child[j] = self.pipe
+                        else:
+                            child[j] = self.space
+                        if len(line) > 0 and line[0] != self.split_line:
+                            child[j] += self.space
+                        child[j] += line # Add the lines from the inner tree back to the prefixes.
+                    string += child # Add the lines of the child to the lines of this tree
+                else:
+                    item = str(item)
                     # If the node is just text, decide if this is the last child of its parent's tree
                     # Change the branch character if it is, otherwise use standard branch character.
                     prefix = self.end if (i == len(self.nodes) - 1) else self.branch
@@ -280,22 +305,4 @@ class Tree:
                             string.append(f"{prefix}{item}")
                     except AttributeError:
                         string.append(f"{prefix}{item}")
-                elif isinstance(item, Tree): # If the child node is another Tree object, generate that object.
-                    child_last = (i == len(self.nodes) - 1) # Boolean as to whether this is the last child of this node
-                    prefix = self.end if last else self.branch # Determines if this is the last child node of its parent, and sets branch character accordingly
-                    # Generate the child node, indicating whether it is the last node.
-                    child = item.__recursive_generation(
-                        child_last, len(prefix) + prior_prefix
-                    )
-                    for j in range(1, len(child)): # Loops through all lines returned from child node
-                        line = child[j]
-                        # Set prefix according to whether this is the last child node or not
-                        if i != len(self.nodes) - 1: 
-                            child[j] = self.pipe
-                        else:
-                            child[j] = self.space
-                        if len(line) > 0 and line[0] != self.split_line:
-                            child[j] += self.space
-                        child[j] += line # Add the lines from the inner tree back to the prefixes.
-                    string += child # Add the lines of the child to the lines of this tree
         return string # Return the lines of this tree level back to the parent
