@@ -26,7 +26,7 @@
 
 
 
-from formatString import tabulate
+from .formatString import tabulate
 
 
 class Tree:
