@@ -228,7 +228,7 @@ class Tree:
             try:
                 if self.line_wrap > 0: # If their is a max text width set, split into multiple lines
                     # Splits the text into a number of lines with max lengths of self.line_wrap
-                    temp = tabulate(self.name, self.line_wrap, 0)
+                    temp = tabulate(str(self), self.line_wrap, 0)
                     temp = temp.split("\n") # Converts string of lines into a list of lines
                     for j in range(len(temp)): # Loops through each line in the text
                         if temp[j].strip() != "": # Ensures that this is not a blank line
@@ -237,9 +237,9 @@ class Tree:
                             else: # Or character indicating that this is continuing from the previous line.
                                 string.append(f"{self.split_line}{temp[j]}") 
                 else: # No line-wrapping, so just add branch character and text
-                    string.append(f"{prefix}{self.name}")
+                    string.append(f"{prefix}{self}")
             except AttributeError:
-                string.append(f"{prefix}{self.name}")
+                string.append(f"{prefix}{self}")
         if self.nodes is not None: # This object has some children nodes
             for i in range(len(self.nodes)): # Loops through each node
                 item = self.nodes[i]
@@ -304,3 +304,9 @@ class Tree:
                     except AttributeError:
                         string.append(f"{prefix}{item}")
         return string # Return the lines of this tree level back to the parent
+
+    def __str__(self):
+        if self.name:
+            return str(self.name)
+        else:
+            return ""
