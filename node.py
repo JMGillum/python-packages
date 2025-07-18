@@ -20,5 +20,7 @@ class Node:
                 return self.print_function(self.print_args)
             else:
                 return self.print_function()
-        return self.name
+        if self.name is not None:
+            return self.name
+        return ""
 
