@@ -1,15 +1,20 @@
-class Node:
-    def __init__(self,name=None,data=None,print_function=None,print_args=None):
+from .tree import Tree
+
+class Node (Tree):
+    def __init__(self,name=None,data=None,print_function=None,print_args=None,nodes=None):
         """
         name is name of node.
         data is the data stored in the node
         print_function stores the function that will be called whenever the node is printed
         print_args are the arguments supplied to print_function
+        nodes is the child nodes of this node.
         """
+        super().__init__(name=name)
         self.name = name
         self.data = data
         self.print_function = print_function
         self.print_args = print_args
+        self.nodes = nodes
 
     def __str__(self):
         """
@@ -20,7 +25,9 @@ class Node:
                 return self.print_function(self.print_args)
             else:
                 return self.print_function()
+        if self.data is not None:
+            return str(self.data)
         if self.name is not None:
-            return self.name
+            return str(self.name)
         return ""
 
