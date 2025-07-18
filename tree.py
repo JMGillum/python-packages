@@ -74,6 +74,8 @@ class Tree:
         Args:
             nodes (list | None): A list of nodes for the tree
         """
+        if not isinstance(nodes,list):
+            nodes = [nodes]
         self.nodes = nodes
         self.dirty = True
 
