@@ -95,11 +95,13 @@ class Tree:
             self.branch = "├─"
             self.end = "└─"
             self.space = " "
+            self.nameless = "┐"
         else:
             self.pipe = "|"
             self.branch = "|->"
             self.end = "|->"
             self.space = "  "
+            self.nameless = "\\"
         self.split_line = "~"
 
     def set_term_size(self, width=80):
@@ -195,7 +197,7 @@ class Tree:
         self.name = None
         self.nodes = [child]
         # Gets the tree, as a list of lines
-        self.list = self.__recursive_generation(True)
+        self.list = self.__recursive_generation(last=True,root=True)
         # Converts the list to a single string
         self.string = ""
         for i in range(len(self.list)):
@@ -211,7 +213,7 @@ class Tree:
         self.dirty = False
         return self.string if as_a_string else self.list
 
-    def __recursive_generation(self, last=False, prior_prefix=0):
+    def __recursive_generation(self, last=False, prior_prefix=0,root=False):
         """ Generates the lines of the tree for printing. This function is recursive and generates 
         child trees as they are encountered. Should not be called from outside of the class. See Tree.print().
 
@@ -223,12 +225,16 @@ class Tree:
             list: a list of lines representing the tree.
         """
         string = []
-        if self.name:
+        #if str(self) != "":
+        name = str(self)
+        if name or not root: # If the name exists or (it doesn't and this isn't the root node)
+            if not name: # Name is empty string
+                name = self.nameless
             prefix = self.end if last else self.branch # Determine if this is the last child of its parent, and sets branch character accordingly
             try:
                 if self.line_wrap > 0: # If their is a max text width set, split into multiple lines
                     # Splits the text into a number of lines with max lengths of self.line_wrap
-                    temp = tabulate(str(self), self.line_wrap, 0)
+                    temp = tabulate(name, self.line_wrap, 0)
                     temp = temp.split("\n") # Converts string of lines into a list of lines
                     for j in range(len(temp)): # Loops through each line in the text
                         if temp[j].strip() != "": # Ensures that this is not a blank line
@@ -237,9 +243,9 @@ class Tree:
                             else: # Or character indicating that this is continuing from the previous line.
                                 string.append(f"{self.split_line}{temp[j]}") 
                 else: # No line-wrapping, so just add branch character and text
-                    string.append(f"{prefix}{self}")
+                    string.append(f"{prefix}{name}")
             except AttributeError:
-                string.append(f"{prefix}{self}")
+                string.append(f"{prefix}{name}")
         if self.nodes is not None: # This object has some children nodes
             for i in range(len(self.nodes)): # Loops through each node
                 item = self.nodes[i]
