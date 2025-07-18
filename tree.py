@@ -268,47 +268,48 @@ class Tree:
                         child[j] += line # Add the lines from the inner tree back to the prefixes.
                     string += child # Add the lines of the child to the lines of this tree
                 else:
-                    item = str(item)
-                    # If the node is just text, decide if this is the last child of its parent's tree
-                    # Change the branch character if it is, otherwise use standard branch character.
-                    prefix = self.end if (i == len(self.nodes) - 1) else self.branch
-                    # Does the same process as with the name, determining if the text needs to be
-                    # split across several lines, and doing so if needed.
-                    try:
-                        wrap = None # The max length of each line that will be printed here.
-                        if self.line_wrap is not None and self.line_wrap > 0:
-                            wrap = self.line_wrap
-                        if self.width is not None and self.width > 0:
-                            # Determines the max width that the text can be. It is equal to the max width minus
-                            # the length of the current prefix and the length of all of the prior prefixes
-                            wrap = self.width - len(prefix) - prior_prefix
-                        if wrap is not None:
-                            temp = tabulate(item, wrap, 0)
-                            temp = temp.split("\n")
-                            for j in range(len(temp)):
-                                if temp[j].strip() != "":
-                                    if j == 0:
-                                        string.append(f"{prefix}{temp[j]}")
-                                    else:
-                                        # Determines which character to use for indicating that this is wrapping.
-                                        # Typically will use a pipe to extend the node if needed, but if
-                                        # it is the last node, will only use a space. Regardless, it also uses the
-                                        # typical split line character.
-                                        # Ex normal node:         Ex last node:
-                                        # -> This is a test       -> This is a test
-                                        # |~ of the line           ~ of the line
-                                        # |~ wrapping function.    ~ wrapping function.
-                                        if i == len(self.nodes) - 1:
-                                            wrap_prefix = self.space
+                    if item is not None:
+                        item = str(item)
+                        # If the node is just text, decide if this is the last child of its parent's tree
+                        # Change the branch character if it is, otherwise use standard branch character.
+                        prefix = self.end if (i == len(self.nodes) - 1) else self.branch
+                        # Does the same process as with the name, determining if the text needs to be
+                        # split across several lines, and doing so if needed.
+                        try:
+                            wrap = None # The max length of each line that will be printed here.
+                            if self.line_wrap is not None and self.line_wrap > 0:
+                                wrap = self.line_wrap
+                            if self.width is not None and self.width > 0:
+                                # Determines the max width that the text can be. It is equal to the max width minus
+                                # the length of the current prefix and the length of all of the prior prefixes
+                                wrap = self.width - len(prefix) - prior_prefix
+                            if wrap is not None:
+                                temp = tabulate(item, wrap, 0)
+                                temp = temp.split("\n")
+                                for j in range(len(temp)):
+                                    if temp[j].strip() != "":
+                                        if j == 0:
+                                            string.append(f"{prefix}{temp[j]}")
                                         else:
-                                            wrap_prefix = self.pipe
-                                        string.append(
-                                            f"{wrap_prefix}{self.split_line}{temp[j]}"
-                                        )
-                        else:
+                                            # Determines which character to use for indicating that this is wrapping.
+                                            # Typically will use a pipe to extend the node if needed, but if
+                                            # it is the last node, will only use a space. Regardless, it also uses the
+                                            # typical split line character.
+                                            # Ex normal node:         Ex last node:
+                                            # -> This is a test       -> This is a test
+                                            # |~ of the line           ~ of the line
+                                            # |~ wrapping function.    ~ wrapping function.
+                                            if i == len(self.nodes) - 1:
+                                                wrap_prefix = self.space
+                                            else:
+                                                wrap_prefix = self.pipe
+                                            string.append(
+                                                f"{wrap_prefix}{self.split_line}{temp[j]}"
+                                            )
+                            else:
+                                string.append(f"{prefix}{item}")
+                        except AttributeError:
                             string.append(f"{prefix}{item}")
-                    except AttributeError:
-                        string.append(f"{prefix}{item}")
         return string # Return the lines of this tree level back to the parent
 
     def __str__(self):
