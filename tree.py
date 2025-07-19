@@ -1,6 +1,6 @@
 """
    Author: Josh Gillum              .
-   Date: 17 July 2025              ":"         __ __ 
+   Date: 17 July 2025              ":"         __ __
                                   __|___       \ V /
                                 .'      '.      | |
                                 |  O       \____/  |
@@ -24,8 +24,6 @@
 ^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~
 """
 
-
-
 from .formatString import tabulate
 
 
@@ -35,11 +33,11 @@ class Tree:
         name: str = None,
         nodes: list | None = None,
         fancy=False,
-        wrap:int=None,
-        width:int=None,
+        wrap: int = None,
+        width: int = None,
     ):
-        """ Class modelling a general purpose tree. All values specified here can later be updated
-        with one of the set_x or cascading_update or cascading_set_x functions. 
+        """Class modelling a general purpose tree. All values specified here can later be updated
+        with one of the set_x or cascading_update or cascading_set_x functions.
 
         Args:
             name (str, optional): The name of the tree. Printed at the current level before its child nodes. Defaults to None.
@@ -60,7 +58,7 @@ class Tree:
         self.set_line_wrap(wrap)
 
     def set_name(self, name: str):
-        """ Sets the name of the tree object
+        """Sets the name of the tree object
 
         Args:
             name (str): The new name of the tree
@@ -69,18 +67,18 @@ class Tree:
         self.dirty = True
 
     def set_nodes(self, nodes: list | None):
-        """ Sets the nodes of the tree. Overwrites any previous nodes
+        """Sets the nodes of the tree. Overwrites any previous nodes
 
         Args:
             nodes (list | None): A list of nodes for the tree
         """
-        if not isinstance(nodes,list):
+        if not isinstance(nodes, list):
             nodes = [nodes]
         self.nodes = nodes
         self.dirty = True
 
     def set_fancy(self, set_fancy: bool):
-        """ Sets the fancy variable for this tree (whether non 7-bit ASCII characters will be used when printing)
+        """Sets the fancy variable for this tree (whether non 7-bit ASCII characters will be used when printing)
 
         Args:
             set_fancy (bool): Whether to use fancy characters or not
@@ -89,7 +87,7 @@ class Tree:
         self.__set_characters()
 
     def __set_characters(self):
-        """ Sets the characters to be used by the tree when printing. Should not be called
+        """Sets the characters to be used by the tree when printing. Should not be called
         from outside of the class. Only needed when self.fancy is changed.
         """
         if self.fancy:
@@ -107,7 +105,7 @@ class Tree:
         self.split_line = "~"
 
     def set_term_size(self, width=80):
-        """ Sets the max width of the tree when printed
+        """Sets the max width of the tree when printed
 
         Args:
             width (int, optional): The terminal size the tree will be printed on (max width of tree). Defaults to 80.
@@ -116,7 +114,7 @@ class Tree:
             self.width = width
 
     def set_line_wrap(self, line_width: int):
-        """ Sets the line_wrap variable
+        """Sets the line_wrap variable
 
         Args:
             line_width (int): The max width of any single node in this tree
@@ -124,8 +122,10 @@ class Tree:
         if line_width is not None:
             self.line_wrap = line_width
 
-    def cascading_update(self, set_fancy:bool=None, line_width:int=None, term_width:int=None):
-        """ Updates the tree and all of its child Tree objects
+    def cascading_update(
+        self, set_fancy: bool = None, line_width: int = None, term_width: int = None
+    ):
+        """Updates the tree and all of its child Tree objects
 
         Args:
             set_fancy (bool, optional): Determines whether non 7-bit ASCII characters will be used when printing the tree. Defaults to None.
@@ -140,7 +140,7 @@ class Tree:
             self.cascading_set_term_size(term_width)
 
     def cascading_set_fancy(self, set_fancy: bool):
-        """ Sets fancy for all of the child nodes of this tree, then for itself
+        """Sets fancy for all of the child nodes of this tree, then for itself
 
         Args:
             set_fancy (bool): Sets the self.fancy variable
@@ -152,7 +152,7 @@ class Tree:
         self.set_fancy(set_fancy)
 
     def cascading_set_term_size(self, width: int):
-        """ Sets the term size for all child nodes of this tree, then for itself
+        """Sets the term size for all child nodes of this tree, then for itself
 
         Args:
             width (int): Sets the self.width variable
@@ -164,7 +164,7 @@ class Tree:
         self.set_term_size(width)
 
     def cascading_set_line_wrap(self, line_width: int):
-        """ Sets the line_wrap variable for all child nodes of this tree, then for itself
+        """Sets the line_wrap variable for all child nodes of this tree, then for itself
 
         Args:
             line_width (int): Sets the self.line_wrap variable
@@ -175,9 +175,8 @@ class Tree:
                     item.cascading_set_line_wrap(line_width)
         self.set_line_wrap(line_width)
 
-
-    def print(self, as_a_string=False,remove_root_branch=True)->str|list:
-        """ Provides the tree in a printable form.
+    def print(self, as_a_string=False, remove_root_branch=True) -> str | list:
+        """Provides the tree in a printable form.
 
         Args:
             as_a_string (bool, optional): Will return a string instead of a list of lines if set to True. Defaults to False.
@@ -199,24 +198,24 @@ class Tree:
         self.name = None
         self.nodes = [child]
         # Gets the tree, as a list of lines
-        self.list = self.__recursive_generation(last=True,root=True)
+        self.list = self.__recursive_generation(last=True, root=True)
         # Converts the list to a single string
         self.string = ""
         for i in range(len(self.list)):
-            if isinstance(self.list[i],str):
+            if isinstance(self.list[i], str):
                 if remove_root_branch:
-                    self.list[i] = self.list[i][len(self.end):]
+                    self.list[i] = self.list[i][len(self.end) :]
                 self.string += f"{self.list[i]}\n"
             else:
-                del(self.list[i])
+                del self.list[i]
         # Restores the original values of the name and nodes.
         self.name = name
         self.nodes = nodes
         self.dirty = False
         return self.string if as_a_string else self.list
 
-    def __recursive_generation(self, last=False, prior_prefix=0,root=False):
-        """ Generates the lines of the tree for printing. This function is recursive and generates 
+    def __recursive_generation(self, last=False, prior_prefix=0, root=False):
+        """Generates the lines of the tree for printing. This function is recursive and generates
         child trees as they are encountered. Should not be called from outside of the class. See Tree.print().
 
         Args:
@@ -227,48 +226,72 @@ class Tree:
             list: a list of lines representing the tree.
         """
         string = []
-        #if str(self) != "":
+        # if str(self) != "":
         name = str(self)
-        if name or not root: # If the name exists or (it doesn't and this isn't the root node)
-            if not name: # Name is empty string
+        if (
+            name or not root
+        ):  # If the name exists or (it doesn't and this isn't the root node)
+            if not name:  # Name is empty string
                 name = self.nameless
-            prefix = self.end if last else self.branch # Determine if this is the last child of its parent, and sets branch character accordingly
+            prefix = (
+                self.end if last else self.branch
+            )  # Determine if this is the last child of its parent, and sets branch character accordingly
             try:
-                if self.line_wrap > 0: # If their is a max text width set, split into multiple lines
+                if (
+                    self.line_wrap > 0
+                ):  # If their is a max text width set, split into multiple lines
                     # Splits the text into a number of lines with max lengths of self.line_wrap
                     temp = tabulate(name, self.line_wrap, 0)
-                    temp = temp.split("\n") # Converts string of lines into a list of lines
-                    for j in range(len(temp)): # Loops through each line in the text
-                        if temp[j].strip() != "": # Ensures that this is not a blank line
+                    temp = temp.split(
+                        "\n"
+                    )  # Converts string of lines into a list of lines
+                    for j in range(len(temp)):  # Loops through each line in the text
+                        if (
+                            temp[j].strip() != ""
+                        ):  # Ensures that this is not a blank line
                             if j == 0:
-                                string.append(f"{prefix}{temp[j]}") # Adds branch character
-                            else: # Or character indicating that this is continuing from the previous line.
-                                string.append(f"{self.split_line}{temp[j]}") 
-                else: # No line-wrapping, so just add branch character and text
+                                string.append(
+                                    f"{prefix}{temp[j]}"
+                                )  # Adds branch character
+                            else:  # Or character indicating that this is continuing from the previous line.
+                                string.append(f"{self.split_line}{temp[j]}")
+                else:  # No line-wrapping, so just add branch character and text
                     string.append(f"{prefix}{name}")
             except AttributeError:
                 string.append(f"{prefix}{name}")
-        if self.nodes is not None: # This object has some children nodes
-            for i in range(len(self.nodes)): # Loops through each node
+        if self.nodes is not None:  # This object has some children nodes
+            for i in range(len(self.nodes)):  # Loops through each node
                 item = self.nodes[i]
-                if isinstance(item, Tree): # If the child node is another Tree object, generate that object.
-                    child_last = (i == len(self.nodes) - 1) # Boolean as to whether this is the last child of this node
-                    prefix = self.end if last else self.branch # Determines if this is the last child node of its parent, and sets branch character accordingly
+                if isinstance(
+                    item, Tree
+                ):  # If the child node is another Tree object, generate that object.
+                    child_last = (
+                        i == len(self.nodes) - 1
+                    )  # Boolean as to whether this is the last child of this node
+                    prefix = (
+                        self.end if last else self.branch
+                    )  # Determines if this is the last child node of its parent, and sets branch character accordingly
                     # Generate the child node, indicating whether it is the last node.
                     child = item.__recursive_generation(
                         child_last, len(prefix) + prior_prefix
                     )
-                    for j in range(1, len(child)): # Loops through all lines returned from child node
+                    for j in range(
+                        1, len(child)
+                    ):  # Loops through all lines returned from child node
                         line = child[j]
                         # Set prefix according to whether this is the last child node or not
-                        if i != len(self.nodes) - 1: 
+                        if i != len(self.nodes) - 1:
                             child[j] = self.pipe
                         else:
                             child[j] = self.space
                         if len(line) > 0 and line[0] != self.split_line:
                             child[j] += self.space
-                        child[j] += line # Add the lines from the inner tree back to the prefixes.
-                    string += child # Add the lines of the child to the lines of this tree
+                        child[j] += (
+                            line  # Add the lines from the inner tree back to the prefixes.
+                        )
+                    string += (
+                        child  # Add the lines of the child to the lines of this tree
+                    )
                 else:
                     if item is not None:
                         item = str(item)
@@ -278,7 +301,7 @@ class Tree:
                         # Does the same process as with the name, determining if the text needs to be
                         # split across several lines, and doing so if needed.
                         try:
-                            wrap = None # The max length of each line that will be printed here.
+                            wrap = None  # The max length of each line that will be printed here.
                             if self.line_wrap is not None and self.line_wrap > 0:
                                 wrap = self.line_wrap
                             if self.width is not None and self.width > 0:
@@ -312,7 +335,7 @@ class Tree:
                                 string.append(f"{prefix}{item}")
                         except AttributeError:
                             string.append(f"{prefix}{item}")
-        return string # Return the lines of this tree level back to the parent
+        return string  # Return the lines of this tree level back to the parent
 
     def __str__(self):
         if self.name:

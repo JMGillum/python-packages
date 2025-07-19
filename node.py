@@ -1,7 +1,10 @@
 from .tree import Tree
 
-class Node (Tree):
-    def __init__(self,data=None,name=None,print_function=None,print_args=None,nodes=None):
+
+class Node(Tree):
+    def __init__(
+        self, data=None, name=None, print_function=None, print_args=None, nodes=None
+    ):
         """
         name is name of node.
         data is the data stored in the node
@@ -14,7 +17,7 @@ class Node (Tree):
         self.data = data
         self.print_function = print_function
         self.print_args = print_args
-        if not isinstance(nodes,list):
+        if not isinstance(nodes, list):
             nodes = [nodes]
         self.nodes = nodes
 
@@ -32,4 +35,3 @@ class Node (Tree):
         if self.name is not None:
             return str(self.name)
         return ""
-
