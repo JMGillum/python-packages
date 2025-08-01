@@ -11,7 +11,7 @@
     It also features improved str casting, as it can store a function to call
     whenever it is cast to string.
 
-    This class is best used when the stored data has child data as well, or 
+    This class is best used when the stored data has child data as well, or
     just if the data is too much/complex to just be stored as the name of the
     tree.
 
@@ -32,7 +32,7 @@ class Node(Tree):
         print_args are the arguments supplied to print_function
         nodes is the child nodes of this node.
         """
-        super().__init__(name=name,nodes=nodes)
+        super().__init__(name=name, nodes=nodes)
         self.name = name
         self.data = data
         self.print_function = print_function
